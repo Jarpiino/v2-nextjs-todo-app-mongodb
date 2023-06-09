@@ -7,7 +7,7 @@ export async function PUT(req, res) {
   try {
     const body = await req.json();
     const filter = { _id: body._id };
-    const update = { todoname: body.todoname };
+    const update = { completed: body.completed };
     await dbConnect();
 
     // console.log(body);

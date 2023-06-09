@@ -44,27 +44,13 @@ function Home() {
     const newTask = { id: `todo-${nanoid()}`, name, completed: false };
     setTasks([...tasks, newTask]);
   };
-  const toggleTaskCompleted = async (id, completedState) => {
-    try {
-      console.log(completedState);
-      if (completedState === false) {
+  const toggleTaskCompleted = async (id, completedState, setCompletedState) => {
+    console.log(completedState);
+    if (completedState === false) {
+      try {
         {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_URL + "/api/todo"}`,
-            {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                _id: id,
-                completed: false,
-              }),
-            }
-          );
-        }
-      } else {
-        {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_URL + "/api/todo"}`,
+            `${process.env.NEXT_PUBLIC_URL + "/api/todocompleted"}`,
             {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
@@ -75,13 +61,32 @@ function Home() {
             }
           );
         }
+      } catch (e) {
+        console.log(e);
       }
-      console.log("done");
-
-      mutate(`${process.env.NEXT_PUBLIC_URL + "/api/todo"}`);
-    } catch (e) {
-      console.log(e);
+    } else {
+      try {
+        {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_URL + "/api/todocompleted"}`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                _id: id,
+                completed: false,
+              }),
+            }
+          );
+        }
+      } catch (e) {
+        console.log(e);
+      }
     }
+    setCompletedState((prev) => (prev === false ? true : false));
+    console.log("done");
+
+    mutate(`${process.env.NEXT_PUBLIC_URL + "/api/todo"}`);
   };
   // const toggleTaskCompleted = (id) => {
   //   const updatedTasks = tasks.map((task) => {
@@ -171,7 +176,7 @@ function Home() {
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
   preload(`${process.env.NEXT_PUBLIC_URL + "/api/todo"}`, fetcher);
-  console.log(process.env.NEXTAUTH_SECRET);
+
   const { data, error, isLoading } = useSWR(
     `${process.env.NEXT_PUBLIC_URL + "/api/todo"}`,
     fetcher
@@ -204,7 +209,6 @@ function Home() {
         </div>
       </div>
     );
-
   const taskList = data
     .filter(FILTER_MAP[filter])
     .map((task) => (
